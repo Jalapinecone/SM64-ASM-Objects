@@ -1,0 +1,100 @@
+.n64
+.create "Proximity_Textbox.bin", 0
+
+;#Instantly Speaks and then crashes.
+
+proximity_textbox: ;
+	addiu 	SP, SP, -0x18
+	sw 		RA, 0x0014(SP)
+
+	lui		T0, 0x8036
+	lw		T0, 0x1160 (T0)
+	lw 		T1, 0x014C (T0)
+
+	beqz T1, check_collision
+	nop
+
+	b act_talk
+	nop
+
+check_collision:
+	;#calling obj_check_if_collided_with_object
+	LUI	A0, 0x8036
+	LW	A1, 0x1158 (A0)
+	JAL	0x802A1424
+	LW	A0, 0x1160 (A0)
+	
+	;#compare if (obj_check_if_collided_with_object(o, gMarioObject) == 0)
+	BEQZ	V0, end
+	;#intentional removal of delay slot
+
+	;#load the current object
+	lui		T0, 0x8036
+	lw		T0, 0x1160 (T0)
+
+	;#set state to 1
+	addiu 	T1, R0, 1
+	
+	b 		end
+	sw 		T1, 0x014C (T0)
+
+act_talk:
+	jal		0x80257640			;#if (set_mario_npc_dialog(1) == 2)
+	addiu	A0, R0, 0x0001		
+	
+	addiu	AT, R0, 0x0002		
+	bne		V0, AT, end			;#if set_mario_npc_dialog(MARIO_DIALOG_LOOK_FRONT) == MARIO_DIALOG_STATUS_SPEAK is false
+	nop
+	
+	;#set active flag to time stopped
+	lui		T6, 0x8036
+	lw		T6, 0x1160 (T6)
+	lh		T7, 0x0074 (T6)
+	ori		T8, T7, 0x0020
+	sh		T8, 0x0074 (T6)
+	
+	;#if
+	lui		T0, 0x8036
+	lw		T0, 0x1160 (T0)
+	addiu	A0, R0, 0x00A2		;#second if
+	or		A1, T0, R0			
+	jal		0x8028FF04			;#cutscene_object_with_dialog(CUTSCENE_DIALOG, o, o->oBehParams2ndByte)
+	lw		A2, 0x0144 (T0)
+	beqz	V0, end				;#else break
+	nop
+
+	;#setting flags in case 1 body
+	jal		0x80257640			;#set_mario_npc_dialog(0);
+	or		A0, R0, R0
+	lui		T1, 0x8036
+	lw		T1, 0x1160 (T1)
+	addiu	AT, R0, 0xFFDF
+	lh		T2, 0x0074 (T1)
+	and		T3, T2, AT
+	sh		T3, 0x0074 (T1)
+	lui		T5, 0x8036
+	lw		T5, 0x1160 (T5)
+	addiu	T4, R0, 0x0002
+	sw		T4, 0x00F8 (T5)
+	lui		T7, 0x8036
+	lw		T7, 0x1160 (T7)
+	addiu	T4, R0, 0x0002
+	sw		T4, 0x00F8 (T5)
+	lui		T7, 0x8036
+	lw		T7, 0x1160 (T7)
+	sw		R0, 0x0134 (T7)
+	lui		T8, 0x8036
+	lw		T8, 0x1160 (T8)
+	sw		R0, 0x014C (T8)
+
+	;#deactivate
+	LUI	T5, 0x8036
+	LW	T5, 0x1160 (T5)
+	SH	R0, 0x0074 (T5)
+
+end:
+	LW		RA, 0x0014 (SP)
+	JR		RA
+	ADDIU	SP, SP, 0x18
+
+.close

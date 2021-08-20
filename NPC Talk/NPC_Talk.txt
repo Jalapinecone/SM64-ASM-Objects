@@ -1,0 +1,5 @@
+Allows Mario to talk to NPC (like bob-omb)
+NPC will turn to face Mario
+Needs collision cylinder in the behaviour script
+
+Behaviour Param 2: text ID

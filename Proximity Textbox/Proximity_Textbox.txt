@@ -1,0 +1,5 @@
+An object that spawns a textbox when mario collides with a hitbox.
+The object despawns after the text is activated once and doesn't respawn until the level is loaded again.
+Must have a collision cylinder in the behaviour script.
+
+Behaviour Param 2: text ID

@@ -1,0 +1,20 @@
+.n64
+.create "Heave Ho Bullet Bill.bin", 0
+
+;#/*0x088*/ oHeaveHoUnk88 OBJECT_FIELD_S32(0x00)
+upwards_blaster_loop:
+	
+	lui 	AT, 0x8036		;#default pointer to the current object
+	lw 		T0, 0x1160(AT)
+
+	addiu	AT, R0, 4
+	lw		T1, 0x014C(T0)	;#T1 = o->oAction
+	bne 	AT, T1, end
+	addiu	T2, R0, 2
+	sw		T2, 0x088(T0)	;#o->oHeaveHoUnk88 = 2
+
+end:
+	jr		RA
+	nop
+	
+.close

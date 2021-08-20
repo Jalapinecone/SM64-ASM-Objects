@@ -1,0 +1,5 @@
+Identical to NPC_Talk, but it spawns a hidden star after the textboxes are finished.
+Another vanilla secret must be placed out of bounds in the level to make the hidden star spawn
+Must have a collision cylinder in the behaviour script
+
+Behaviour Param 2: text ID

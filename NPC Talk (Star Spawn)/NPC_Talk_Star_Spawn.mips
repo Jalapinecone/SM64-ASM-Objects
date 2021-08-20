@@ -1,0 +1,101 @@
+.n64
+.create "NPC_Talk_Star_Spawn.bin", 0
+
+tabby_spawn_star: ;#802E79DC
+	addiu 	SP, SP, -0x18
+	sw 		RA, 0x0014(SP)
+
+	lui		T0, 0x8036
+	lw		T0, 0x1160 (T0)
+	lw 		T1, 0x014C (T0)
+
+	beqz T1, tabby_act_idle
+	nop
+
+	addiu AT, R0, 2
+	beq AT, T1, tabby_turn_to_talk
+	nop
+
+	b tabby_act_talk
+	nop
+
+tabby_act_idle:
+	jal 0x802E770C				;#bobomb_buddy_act_idle
+	nop
+	b 	end
+	nop
+
+tabby_turn_to_talk:
+	jal 0x802E7B00				;#bobomb_buddy_turn_to_talk
+	nop
+	b 	end
+	nop
+
+tabby_act_talk:
+	jal		0x80257640			;#if (set_mario_npc_dialog(1) == 2)
+	addiu	A0, R0, 0x0001		
+	
+	addiu	AT, R0, 0x0002		
+	bne		V0, AT, end			;#if set_mario_npc_dialog(MARIO_DIALOG_LOOK_FRONT) == MARIO_DIALOG_STATUS_SPEAK is false
+	nop
+	
+	;#set active flag to time stopped
+	lui		T6, 0x8036
+	lw		T6, 0x1160 (T6)
+	lh		T7, 0x0074 (T6)
+	ori		T8, T7, 0x0020
+	sh		T8, 0x0074 (T6)
+	
+	;#if
+	lui		T0, 0x8036
+	lw		T0, 0x1160 (T0)
+	addiu	A0, R0, 0x00A2		;#second if
+	or		A1, T0, R0			
+	jal		0x8028FF04			;#cutscene_object_with_dialog(CUTSCENE_DIALOG, o, o->oBehParams2ndByte)
+	lw		A2, 0x0144 (T0)
+	beqz	V0, end				;#else break
+	nop
+
+	;#setting flags in case 1 body
+	jal		0x80257640			;#set_mario_npc_dialog(0);
+	or		A0, R0, R0
+	lui		T1, 0x8036
+	lw		T1, 0x1160 (T1)
+	addiu	AT, R0, 0xFFDF
+	lh		T2, 0x0074 (T1)
+	and		T3, T2, AT
+	sh		T3, 0x0074 (T1)
+	lui		T5, 0x8036
+	lw		T5, 0x1160 (T5)
+	addiu	T4, R0, 0x0002
+	sw		T4, 0x00F8 (T5)
+	lui		T7, 0x8036
+	lw		T7, 0x1160 (T7)
+	addiu	T4, R0, 0x0002
+	sw		T4, 0x00F8 (T5)
+	lui		T7, 0x8036
+	lw		T7, 0x1160 (T7)
+	sw		R0, 0x0134 (T7)
+	lui		T8, 0x8036
+	lw		T8, 0x1160 (T8)
+	sw		R0, 0x014C (T8)
+	
+	;#calling bhvHiddenStar
+	LUI 	A0, 0x1300
+	JAL		0x8029F95C
+	ADDIU	A0, A0, 0x3EFC
+	
+	;#check if hiddenStar != NULL
+	BEQZ	V0, end
+	NOP
+	
+	;#set trigger counter to 5
+	ADDIU 	AT, R0, 0x0005
+	SW		AT, 0x00F4(V0)
+
+end:
+	LW		RA, 0x0014 (SP)
+	JR		RA
+	ADDIU	SP, SP, 0x18
+
+.close

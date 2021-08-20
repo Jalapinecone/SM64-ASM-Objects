@@ -1,0 +1,42 @@
+.n64
+.create "Instant_Star_Spawn.bin", 0
+
+silent_secret:
+	ADDIU SP, SP, -0x20
+	SW	RA, 0x0014 (SP)
+	
+	;#calling obj_check_if_collided_with_object
+	LUI	A0, 0x8036
+	LW	A1, 0x1158 (A0)
+	JAL	0x802A1424
+	LW	A0, 0x1160 (A0)
+	
+	;#compare if (obj_check_if_collided_with_object(o, gMarioObject) == 1)
+	ADDIU	AT, R0, 0x0001
+	BNE	V0, AT, end
+	NOP
+	
+	;#calling bhvHiddenStar
+	LUI A0, 0x1300
+	JAL	0x8029F95C
+	ADDIU	A0, A0, 0x3EFC
+	
+	;#check if hiddenStar != NULL
+	BEQZ	V0, deactivate
+	NOP
+	
+	;#set trigger counter to 5
+	ADDIU AT, R0, 0x0005
+	SW AT, 0x00F4(V0)
+
+deactivate:
+	LUI	T5, 0x8036
+	LW	T5, 0x1160 (T5)
+	SH	R0, 0x0074 (T5)
+
+end:
+	LW	RA, 0x0014 (SP)
+	JR	RA
+	ADDIU	SP, SP, 0x20
+
+.close

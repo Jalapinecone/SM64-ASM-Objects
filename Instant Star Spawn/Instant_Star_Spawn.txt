@@ -1,0 +1,4 @@
+Spawns a Hidden Star object instantly when mario collides with the collision cylinder.
+Does not play a sound or display a number like vanilla secrets do
+Another vanilla secret must be placed out of bounds in the level to make the hidden star spawn
+Must have a collision cylinder in the behaviour script
